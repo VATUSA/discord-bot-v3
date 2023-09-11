@@ -6,4 +6,4 @@ resources:
 
 images:
   - name: vatusa/discord-bot-v3
-    newTag: "1.0.36"
+    newTag: "1.0.37"
