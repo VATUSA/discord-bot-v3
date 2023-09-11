@@ -180,9 +180,15 @@ roles:
       - conditions:
         - type: in_division
           value: true
+        - type: home_or_visit
+          value: ZAB
+          invert: true
       - conditions:
         - type: division_visitor
           value: true
+        - type: home_or_visit
+          value: ZAB
+          invert: true
   - id: 806720140095520768
     name: Site Verified
     criteria:
