@@ -17,7 +17,7 @@ func Session() (*discordgo.Session, error) {
 }
 
 func Run() {
-	println("Starting discord-bot-v3")
+	log.Print("Starting discord-bot-v3")
 	session, err := Session()
 	if err != nil {
 		println(err.Error())

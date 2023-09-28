@@ -11,6 +11,9 @@ func AddMemberHandlers(s *discordgo.Session) {
 }
 
 func ProcessMember(s *discordgo.Session, m *discordgo.Member, cfg *ServerConfig) error {
+	if m.User.Bot {
+		return nil // Don't try to process bots
+	}
 	controller, err := api2.GetControllerData(m.User.ID)
 	if err != nil {
 		return err
