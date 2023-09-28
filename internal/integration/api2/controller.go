@@ -2,6 +2,7 @@ package api2
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 )
@@ -37,8 +38,11 @@ func GetControllerData(discordId string) (*ControllerData, error) {
 	if err != nil {
 		return nil, err
 	}
-	if response.StatusCode != 200 {
+	if response.StatusCode == 404 {
 		return nil, nil
+	}
+	if response.StatusCode != 200 {
+		return nil, errors.New("HTTP Error when fetching controller data")
 	}
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
