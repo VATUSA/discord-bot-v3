@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 )
 
 func Session() (*discordgo.Session, error) {
@@ -33,6 +34,7 @@ func Run() {
 			for {
 				QueueListen(s)
 				log.Println("MQ Connection lost. Attempting to reconnect.")
+				time.Sleep(5 * time.Second)
 			}
 		}()
 	})

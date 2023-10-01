@@ -9,13 +9,19 @@ import (
 
 func QueueListen(s *discordgo.Session) {
 	conn, err := amqp.Dial(queue.ConnectionString())
-	queue.FailOnError(err, "Failed to connect to RabbitMQ")
+	if err != nil {
+		log.Println("Failed to connect to RabbitMQ")
+		return
+	}
 	notify := make(chan *amqp.Error)
 	conn.NotifyClose(notify)
 	defer conn.Close()
 
 	ch, err := conn.Channel()
-	queue.FailOnError(err, "Failed to open a channel")
+	if err != nil {
+		log.Println("Failed to open a channel")
+		return
+	}
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
@@ -26,7 +32,10 @@ func QueueListen(s *discordgo.Session) {
 		false,          // no-wait
 		nil,            // arguments
 	)
-	queue.FailOnError(err, "Failed to declare a queue")
+	if err != nil {
+		log.Println("Failed to declare a queue")
+		return
+	}
 
 	msgs, err := ch.Consume(
 		q.Name, // queue
@@ -37,7 +46,10 @@ func QueueListen(s *discordgo.Session) {
 		false,  // no-wait
 		nil,    // args
 	)
-	queue.FailOnError(err, "Failed to register a consumer")
+	if err != nil {
+		log.Println("Failed to register a consumer")
+		return
+	}
 
 	log.Print("Connected to RabbitMQ. Waiting for messages...")
 
