@@ -32,6 +32,7 @@ func Run() {
 		go func() {
 			for {
 				QueueListen(s)
+				log.Println("MQ Connection lost. Attempting to reconnect.")
 			}
 		}()
 	})

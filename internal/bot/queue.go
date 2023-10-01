@@ -10,6 +10,8 @@ import (
 func QueueListen(s *discordgo.Session) {
 	conn, err := amqp.Dial(queue.ConnectionString())
 	queue.FailOnError(err, "Failed to connect to RabbitMQ")
+	notify := make(chan *amqp.Error)
+	conn.NotifyClose(notify)
 	defer conn.Close()
 
 	ch, err := conn.Channel()
@@ -37,18 +39,18 @@ func QueueListen(s *discordgo.Session) {
 	)
 	queue.FailOnError(err, "Failed to register a consumer")
 
-	var forever chan struct{}
+	log.Print("Connected to RabbitMQ. Waiting for messages...")
 
-	go func() {
-		for d := range msgs {
+loop:
+	for {
+		select {
+		case err = <-notify:
+			break loop
+		case d := <-msgs:
 			log.Printf("Received a message: %s", d.Body)
 			ProcessMemberInGuilds(s, string(d.Body))
 			d.Ack(false)
 		}
-		log.Printf("End of MQ loop")
-	}()
-
-	log.Print("Connected to RabbitMQ. Waiting for messages...")
-	<-forever
+	}
 	log.Print("Stopped processing RabbitMQ.")
 }
