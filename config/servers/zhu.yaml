@@ -7,11 +7,10 @@ name_format_type: first_last
 title_type: local
 roles:
   - id: 1161134144366071908
-    name: Unlinked
+    name: Verified
     criteria:
       - conditions:
           - type: all
-            invert: true
 
   #
   # Roster
