@@ -129,7 +129,7 @@ func CalculateLocalTitle(c *api2.ControllerData, cfg *ServerConfig) string {
 		re := regexp.MustCompile("ATM|DATM|TA|FE|EC|WM")
 		if re.MatchString(r.Role) {
 			if r.Facility == cfg.Facility {
-				return fmt.Sprintf("%s %s", r.Facility, r.Role)
+				return fmt.Sprintf("%s", r.Role)
 			}
 			return fmt.Sprintf("%s %s", r.Facility, r.Role)
 		}
