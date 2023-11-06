@@ -1,7 +1,7 @@
 package bot
 
 import (
-	"github.com/VATUSA/discord-bot-v3/internal/integration/api2"
+	"github.com/VATUSA/discord-bot-v3/internal/api"
 	"github.com/bwmarrin/discordgo"
 	"log"
 )
@@ -14,7 +14,7 @@ func ProcessMember(s *discordgo.Session, m *discordgo.Member, cfg *ServerConfig)
 	if m.User.Bot {
 		return nil // Don't try to process bots
 	}
-	controller, err := api2.GetControllerData(m.User.ID)
+	controller, err := api.GetControllerData(m.User.ID)
 	if err != nil {
 		return err
 	}

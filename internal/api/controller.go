@@ -1,4 +1,4 @@
-package api2
+package api
 
 import (
 	"encoding/json"
@@ -20,6 +20,7 @@ type ControllerData struct {
 	Rating             int     `json:"rating"`
 	RatingShort        string  `json:"rating_short"`
 	FlagHomeController bool    `json:"flag_homecontroller"`
+	FlagNamePrivacy    bool    `json:"flag_nameprivacy"`
 	Roles              []ControllerRoleData
 	VisitingFacilities []ControllerVisitingFacilityData `json:"visiting_facilities"`
 }

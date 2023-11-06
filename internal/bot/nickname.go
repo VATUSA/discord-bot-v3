@@ -3,7 +3,7 @@ package bot
 import (
 	"errors"
 	"fmt"
-	"github.com/VATUSA/discord-bot-v3/internal/integration/api2"
+	"github.com/VATUSA/discord-bot-v3/internal/api"
 	"github.com/VATUSA/discord-bot-v3/pkg/constants"
 	"github.com/bwmarrin/discordgo"
 	"log"
@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func SyncName(s *discordgo.Session, m *discordgo.Member, c *api2.ControllerData, cfg *ServerConfig) error {
+func SyncName(s *discordgo.Session, m *discordgo.Member, c *api.ControllerData, cfg *ServerConfig) error {
 	if c == nil {
 		if m.Nick != "" {
 			log.Printf("Nickname Removed %s for ID %s", m.Nick, m.User.ID)
@@ -57,14 +57,20 @@ func SyncName(s *discordgo.Session, m *discordgo.Member, c *api2.ControllerData,
 	return nil
 }
 
-func CalculateName(c *api2.ControllerData, cfg *ServerConfig) (string, error) {
+func CalculateName(c *api.ControllerData, cfg *ServerConfig) (string, error) {
 	switch cfg.NameFormatType {
 	case constants.NameFormat_None:
 		return "", nil
 	case constants.NameFormat_FirstLast:
+		if c.FlagNamePrivacy {
+			return fmt.Sprintf("%s %d", c.FirstName, c.CID), nil
+		}
 		return fmt.Sprintf("%s %s", c.FirstName, c.LastName), nil
 
 	case constants.NameFormat_FirstL:
+		if c.FlagNamePrivacy {
+			return fmt.Sprintf("%s", c.FirstName), nil
+		}
 		return fmt.Sprintf("%s %s", c.FirstName, c.LastName[0]), nil
 	case constants.NameFormat_CertificateID:
 		return fmt.Sprintf("%d", c.CID), nil
@@ -73,7 +79,7 @@ func CalculateName(c *api2.ControllerData, cfg *ServerConfig) (string, error) {
 	}
 }
 
-func CalculateTitle(c *api2.ControllerData, cfg *ServerConfig) (string, error) {
+func CalculateTitle(c *api.ControllerData, cfg *ServerConfig) (string, error) {
 	switch cfg.TitleType {
 	case constants.Title_Division:
 		return CalculateDivisionTitle(c, cfg), nil
@@ -88,7 +94,7 @@ func CalculateTitle(c *api2.ControllerData, cfg *ServerConfig) (string, error) {
 	}
 }
 
-func CalculateDivisionTitle(c *api2.ControllerData, cfg *ServerConfig) string {
+func CalculateDivisionTitle(c *api.ControllerData, cfg *ServerConfig) string {
 	for _, r := range c.Roles {
 		if strings.HasPrefix(r.Role, "US") {
 			re := regexp.MustCompile("[0-9]+")
@@ -115,7 +121,7 @@ func CalculateDivisionTitle(c *api2.ControllerData, cfg *ServerConfig) string {
 	}
 }
 
-func CalculateLocalTitle(c *api2.ControllerData, cfg *ServerConfig) string {
+func CalculateLocalTitle(c *api.ControllerData, cfg *ServerConfig) string {
 	for _, r := range c.Roles {
 		if strings.HasPrefix(r.Role, "US") {
 			re := regexp.MustCompile("[0-9]+")
