@@ -118,5 +118,5 @@ roles:
     name: Member
     criteria:
       - conditions:
-          - type: rating
-            value: OBS
+          - type: all
+            value: true
