@@ -114,4 +114,9 @@ roles:
       - conditions:
           - type: visit
             value: ZID
-
+  - id: 1125403438545641564
+    name: Member
+    criteria:
+      - conditions:
+          - type: rating
+            value: OBS
