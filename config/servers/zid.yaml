@@ -107,11 +107,7 @@ roles:
     criteria:
       - conditions:
           - type: home
-            value: ZID
-  - id: 672790767286353930
-    name: Visiting Controller
-    criteria:
-      - conditions:
+            value: ZID     
           - type: visit
             value: ZID
   - id: 1125403438545641564
