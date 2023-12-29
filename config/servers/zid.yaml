@@ -103,14 +103,11 @@ roles:
           - type: role
             value: ACE
   - id: 477495351838900254
-    name: Home Controller
+    name: Air Traffic Controller
     criteria:
       - conditions:
           - type: home
             value: ZID
-  - id: 672790767286353930
-    name: Visiting Controller
-    criteria:
       - conditions:
           - type: visit
             value: ZID
