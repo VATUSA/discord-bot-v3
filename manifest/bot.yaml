@@ -24,5 +24,12 @@ spec:
           envFrom:
             - secretRef:
                 name: discord-bot
+          volumeMounts:
+            - mountPath: "/mnt/config"
+              name: config
+      volumes:
+        - name: config
+          configMap:
+            name: discord-bot-v3-config
       restartPolicy: Always
       
