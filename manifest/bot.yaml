@@ -23,7 +23,7 @@ spec:
           command: ["/app/bot"]
           env:
             - name: CONFIG_PATH
-              value: "/mnt/config"
+              value: "/mnt/config/..data/"
           envFrom:
             - secretRef:
                 name: discord-bot
