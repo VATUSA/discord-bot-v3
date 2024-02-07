@@ -7,6 +7,7 @@ import (
 	"github.com/VATUSA/discord-bot-v3/pkg/constants"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	"log"
 	"os"
 )
 
@@ -41,7 +42,7 @@ type ConditionConfig struct {
 func LoadAllServerConfigOrPanic(configPath string) map[string]ServerConfig {
 	configs, err := LoadAllServerConfig(configPath)
 	if err != nil {
-		panic(err.Error())
+		log.Printf(err.Error())
 	}
 	return configs
 }
@@ -56,7 +57,8 @@ func LoadAllServerConfig(configPath string) (map[string]ServerConfig, error) {
 		if !f.IsDir() {
 			cfg, err := LoadServerConfig(fmt.Sprintf("%s/%s", configPath, f.Name()))
 			if err != nil {
-				return nil, err
+				log.Printf(err.Error())
+				return nil, nil
 			}
 			configs[cfg.ID] = *cfg
 		}
