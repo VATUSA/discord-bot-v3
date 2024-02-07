@@ -78,7 +78,7 @@ func LoadServerConfig(configPath string) (*ServerConfig, error) {
 	}
 	// TODO: Validate that roles aren't duplicated
 	// TODO: Validate role criteria
-	fmt.Printf("Loaded Config for %s (%s)\n", cfg.Name, cfg.ID)
+	log.Printf("Loaded Config for %s (%s)\n", cfg.Name, cfg.ID)
 	return &cfg, nil
 }
 
