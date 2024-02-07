@@ -53,11 +53,13 @@ func LoadAllServerConfig(configPath string) (map[string]ServerConfig, error) {
 		return nil, errors.New("failed to load server configs")
 	}
 	for _, f := range files {
-		cfg, err := LoadServerConfig(fmt.Sprintf("%s/%s", configPath, f.Name()))
-		if err != nil {
-			return nil, err
+		if !f.IsDir() {
+			cfg, err := LoadServerConfig(fmt.Sprintf("%s/%s", configPath, f.Name()))
+			if err != nil {
+				return nil, err
+			}
+			configs[cfg.ID] = *cfg
 		}
-		configs[cfg.ID] = *cfg
 	}
 	return configs, nil
 }
