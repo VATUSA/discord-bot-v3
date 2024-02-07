@@ -11,4 +11,3 @@ RUN go build -o bin/web ./cmd/web/main.go
 FROM alpine:latest AS app
 WORKDIR /app
 COPY --from=build /go/src/github.com/VATUSA/discord-bot-v3/bin/* ./
-COPY config ./config
