@@ -3,6 +3,7 @@ package bot
 import (
 	"errors"
 	"fmt"
+	"github.com/VATUSA/discord-bot-v3/internal/config"
 	"github.com/VATUSA/discord-bot-v3/pkg/constants"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
@@ -66,17 +67,17 @@ func LoadServerConfig(configPath string) (*ServerConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	var config ServerConfig
-	err = yaml.Unmarshal(data, &config)
+	var cfg ServerConfig
+	err = yaml.Unmarshal(data, &cfg)
 	if err != nil {
 		return nil, err
 	}
 	// TODO: Validate that roles aren't duplicated
 	// TODO: Validate role criteria
-	return &config, nil
+	return &cfg, nil
 }
 
-var configs = LoadAllServerConfigOrPanic("./config/servers/")
+var configs = LoadAllServerConfigOrPanic(config.CONFIG_PATH)
 
 func GetServerConfig(id string) *ServerConfig {
 	cfg, ok := configs[id]

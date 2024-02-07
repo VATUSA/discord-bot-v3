@@ -21,6 +21,9 @@ spec:
           image: vatusa/discord-bot-v3
           imagePullPolicy: IfNotPresent
           command: ["/app/bot"]
+          env:
+            - name: CONFIG_PATH
+              value: "/mnt/config"
           envFrom:
             - secretRef:
                 name: discord-bot
