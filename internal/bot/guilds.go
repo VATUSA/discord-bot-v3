@@ -37,7 +37,7 @@ func ProcessMemberInGuilds(s *discordgo.Session, id string) {
 			}
 			err = ProcessMember(s, member, cfg)
 			if err != nil {
-				log.Printf("Error in ProcessMember %s: %s", member.User.ID, err.Error())
+				log.Printf("[%s] Error in ProcessMember %s: %s", cfg.Name, member.User.ID, err.Error())
 			}
 		}
 	}

@@ -14,7 +14,7 @@ import (
 func SyncName(s *discordgo.Session, m *discordgo.Member, c *api.ControllerData, cfg *ServerConfig) error {
 	if c == nil {
 		if m.Nick != "" {
-			log.Printf("Nickname Removed %s for ID %s", m.Nick, m.User.ID)
+			log.Printf("[%s] Nickname Removed %s for ID %s", cfg.Name, m.Nick, m.User.ID)
 			err := s.GuildMemberNickname(m.GuildID, m.User.ID, "")
 			if err != nil {
 				return err
@@ -45,10 +45,10 @@ func SyncName(s *discordgo.Session, m *discordgo.Member, c *api.ControllerData, 
 		oldProspect := prospect
 		nameParts := strings.SplitN(name, " ", -1)
 		prospect = fmt.Sprintf("%s %s | %s", nameParts[0], nameParts[len(nameParts)-1], title)
-		log.Printf("Prospective nickname too long %s - Shortened to %s", oldProspect, prospect)
+		log.Printf("[%s] Prospective nickname too long %s - Shortened to %s", cfg.Name, oldProspect, prospect)
 	}
 	if prospect != m.Nick {
-		log.Printf("Nickname Change %s -> %s for ID %s", m.Nick, prospect, m.User.ID)
+		log.Printf("[%s] Nickname Change %s -> %s for ID %s", cfg.Name, m.Nick, prospect, m.User.ID)
 		err := s.GuildMemberNickname(m.GuildID, m.User.ID, prospect)
 		if err != nil {
 			return err

@@ -37,7 +37,7 @@ func ProcessGuildMembersChunk(s *discordgo.Session, mc *discordgo.GuildMembersCh
 	for _, member := range mc.Members {
 		err := ProcessMember(s, member, cfg)
 		if err != nil {
-			log.Printf("Error in ProcessMember %s: %s", member.User.ID, err.Error())
+			log.Printf("[%s] Error in ProcessMember %s: %s", cfg.Name, member.User.ID, err.Error())
 		}
 	}
 }
