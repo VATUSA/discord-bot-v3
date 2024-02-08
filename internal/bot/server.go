@@ -87,9 +87,9 @@ var configs = LoadAllServerConfigOrPanic(config.CONFIG_PATH)
 
 func IntervalReloadConfigs() {
 	for {
+		time.Sleep(5 * time.Minute)
 		log.Print("Reloading server configs")
 		configs = LoadAllServerConfigOrPanic(config.CONFIG_PATH)
-		time.Sleep(5 * time.Hour)
 	}
 }
 
