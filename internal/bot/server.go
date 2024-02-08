@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 )
 
 type ServerConfig struct {
@@ -40,15 +41,15 @@ type ConditionConfig struct {
 }
 
 func LoadAllServerConfigOrPanic(configPath string) map[string]ServerConfig {
-	configs, err := LoadAllServerConfig(configPath)
+	cfgs, err := LoadAllServerConfig(configPath)
 	if err != nil {
 		log.Printf(err.Error())
 	}
-	return configs
+	return cfgs
 }
 
 func LoadAllServerConfig(configPath string) (map[string]ServerConfig, error) {
-	configs := make(map[string]ServerConfig, 0)
+	cfgs := make(map[string]ServerConfig, 0)
 	files, err := os.ReadDir(configPath)
 	if err != nil {
 		return nil, errors.New("failed to load server configs")
@@ -60,10 +61,10 @@ func LoadAllServerConfig(configPath string) (map[string]ServerConfig, error) {
 				log.Printf(err.Error())
 				return nil, nil
 			}
-			configs[cfg.ID] = *cfg
+			cfgs[cfg.ID] = *cfg
 		}
 	}
-	return configs, nil
+	return cfgs, nil
 }
 
 func LoadServerConfig(configPath string) (*ServerConfig, error) {
@@ -83,6 +84,14 @@ func LoadServerConfig(configPath string) (*ServerConfig, error) {
 }
 
 var configs = LoadAllServerConfigOrPanic(config.CONFIG_PATH)
+
+func IntervalReloadConfigs() {
+	for {
+		log.Print("Reloading server configs")
+		configs = LoadAllServerConfigOrPanic(config.CONFIG_PATH)
+		time.Sleep(5 * time.Hour)
+	}
+}
 
 func GetServerConfig(id string) *ServerConfig {
 	cfg, ok := configs[id]
