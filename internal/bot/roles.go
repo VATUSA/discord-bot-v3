@@ -21,7 +21,7 @@ func SyncRoles(s *discordgo.Session, m *discordgo.Member, c *api.ControllerData,
 		for _, criteria := range role.Criteria {
 			if checkCriteria(c, &criteria) {
 				if !slices.Contains(m.Roles, role.ID) {
-					log.Printf("Add role %s to member %s %s", roleDisplay, m.Nick, m.User.ID)
+					log.Printf("[%s] Add role %s to member %s %s", cfg.Name, roleDisplay, m.Nick, m.User.ID)
 					err := s.GuildMemberRoleAdd(m.GuildID, m.User.ID, role.ID)
 					if err != nil {
 						return err
@@ -33,7 +33,7 @@ func SyncRoles(s *discordgo.Session, m *discordgo.Member, c *api.ControllerData,
 		}
 		if !assigned {
 			if slices.Contains(m.Roles, role.ID) {
-				log.Printf("Remove role %s from member %s %s", roleDisplay, m.Nick, m.User.ID)
+				log.Printf("[%s] Remove role %s from member %s %s", cfg.Name, roleDisplay, m.Nick, m.User.ID)
 				err := s.GuildMemberRoleRemove(m.GuildID, m.User.ID, role.ID)
 				if err != nil {
 					return err
