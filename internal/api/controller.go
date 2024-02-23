@@ -12,7 +12,7 @@ type ControllerDataWrapper struct {
 }
 
 type ControllerData struct {
-	CID                uint    `json:"cid"`
+	CID                uint64  `json:"cid"`
 	FirstName          string  `json:"fname"`
 	LastName           string  `json:"lname"`
 	Email              *string `json:"email"`

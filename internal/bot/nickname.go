@@ -94,6 +94,30 @@ func CalculateTitle(c *api.ControllerData, cfg *ServerConfig) (string, error) {
 	}
 }
 
+func facilityStaffTitle(c *api.ControllerData) (string, bool) {
+	facility := GetFacilityData(c.Facility)
+	if facility.AirTrafficManagerCID == c.CID {
+		return "ATM", true
+	}
+	if facility.DeputyAirTrafficManagerCID == c.CID {
+		return "DATM", true
+	}
+	if facility.TrainingAdministratorCID == c.CID {
+		return "TA", true
+	}
+	if facility.EventCoordinatorCID == c.CID {
+		return "EC", true
+	}
+	if facility.FacilityEngineerCID == c.CID {
+		return "FE", true
+	}
+	if facility.WebMasterCID == c.CID {
+		return "WM", true
+	}
+
+	return "", false
+}
+
 func CalculateDivisionTitle(c *api.ControllerData, cfg *ServerConfig) string {
 	for _, r := range c.Roles {
 		if strings.HasPrefix(r.Role, "US") {
@@ -104,11 +128,9 @@ func CalculateDivisionTitle(c *api.ControllerData, cfg *ServerConfig) string {
 			}
 		}
 	}
-	for _, r := range c.Roles {
-		re := regexp.MustCompile("ATM|DATM|TA|FE|EC|WM")
-		if re.MatchString(r.Role) {
-			return fmt.Sprintf("%s %s", r.Facility, r.Role)
-		}
+	roleTitle, hasRoleTitle := facilityStaffTitle(c)
+	if hasRoleTitle {
+		return fmt.Sprintf("%s %s", c.Facility, roleTitle)
 	}
 	if c.Facility == "ZZN" {
 		return fmt.Sprintf("%s", c.RatingShort)
@@ -131,14 +153,9 @@ func CalculateLocalTitle(c *api.ControllerData, cfg *ServerConfig) string {
 			}
 		}
 	}
-	for _, r := range c.Roles {
-		re := regexp.MustCompile("ATM|DATM|TA|FE|EC|WM")
-		if re.MatchString(r.Role) {
-			if r.Facility == cfg.Facility {
-				return fmt.Sprintf("%s", r.Role)
-			}
-			return fmt.Sprintf("%s %s", r.Facility, r.Role)
-		}
+	roleTitle, hasRoleTitle := facilityStaffTitle(c)
+	if hasRoleTitle {
+		return fmt.Sprintf("%s %s", c.Facility, roleTitle)
 	}
 	if c.Facility == "ZZN" {
 		return fmt.Sprintf("%s", c.RatingShort)
