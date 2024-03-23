@@ -9,6 +9,7 @@ import (
 func DoRequest(request *http.Request) (*http.Response, error) {
 	client := http.Client{}
 	request.Header.Set("Authorization", fmt.Sprintf(""))
+	request.Header.Set("User-Agent", "VATUSA_Discord_Bot_V3")
 
 	response, err := client.Do(request)
 	return response, err
