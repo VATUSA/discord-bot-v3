@@ -26,6 +26,8 @@ func LoadFacilityData() {
 func GetFacilityData(facilityId string) api.FacilityData {
 	if LastFacilityDataLoad == nil || time.Now().After(LastFacilityDataLoad.Add(FacilityDataCacheDuration)) {
 		LoadFacilityData()
+		t := time.Now()
+		LastFacilityDataLoad = &t
 	}
 	facility := FacilityDataByIdMap[facilityId]
 	return facility
