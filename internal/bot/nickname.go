@@ -123,6 +123,9 @@ func CalculateDivisionTitle(c *api.ControllerData, cfg *ServerConfig) string {
 		if strings.HasPrefix(r.Role, "US") {
 			re := regexp.MustCompile("[0-9]+")
 			match := re.FindString(r.Role)
+			if match == "0" {
+				return "VATUSA"
+			}
 			if match != "" {
 				return fmt.Sprintf("VATUSA%s", match)
 			}
