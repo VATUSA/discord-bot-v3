@@ -71,7 +71,7 @@ func CalculateName(c *api.ControllerData, cfg *ServerConfig) (string, error) {
 		if c.FlagNamePrivacy {
 			return fmt.Sprintf("%s", c.FirstName), nil
 		}
-		return fmt.Sprintf("%s %s", c.FirstName, c.LastName[0]), nil
+		return fmt.Sprintf("%s %c", c.FirstName, c.LastName[0]), nil
 	case constants.NameFormat_CertificateID:
 		return fmt.Sprintf("%d", c.CID), nil
 	default:
