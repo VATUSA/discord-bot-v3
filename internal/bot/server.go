@@ -6,7 +6,6 @@ import (
 	"github.com/VATUSA/discord-bot-v3/internal/config"
 	"github.com/VATUSA/discord-bot-v3/pkg/constants"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -68,7 +67,7 @@ func LoadAllServerConfig(configPath string) (map[string]ServerConfig, error) {
 }
 
 func LoadServerConfig(configPath string) (*ServerConfig, error) {
-	data, err := ioutil.ReadFile(configPath)
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, err
 	}
