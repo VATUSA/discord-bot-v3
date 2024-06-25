@@ -49,29 +49,32 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Update kustomization Version
-        uses: jacobtomlinson/gha-find-replace@v3
+  deploy:
+    name: Deploy to ArgoCD
+    runs-on: ubuntu-latest
+    needs: push_to_registry
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
         with:
-          find: 'newTag: ".*"'
-          replace: 'newTag: "${{ github.ref_name }}"'
-          include: "manifest/kustomization.yaml"
-          regex: true
-
-      - name: Debug kustomization
+          repository: 'VATUSA/gitops'
+          path: gitops
+          token: ${{ secrets.G_TOKEN }}
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v2
+      - name: Update manifests
         run: |
-          cat manifest/kustomization.yaml
-
-      # Commit all changed files back to the repository
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        id: auto_commit
-        with:
-          branch: main
-
-      - name: Update Tags
+          cd $GITHUB_WORKSPACE/gitops/current
+          kustomize edit set image vatusa/discord-bot-v3=vatusa/discord-bot-v3:${{ github.ref_name }}
+      - name: Commit and push changes
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
-          git tag -f release ${{ steps.auto_commit.outputs.commit_hash }}
-          git tag -f ${{ github.ref_name }} ${{ steps.auto_commit.outputs.commit_hash }}
-          git push origin release -f
-          git push origin ${{ github.ref_name }} -f
+          cd $GITHUB_WORKSPACE/gitops
+          git config --global user.email "vatusa6@vatusa.net"
+          git config --global user.name "VATUSA6"
+          echo ${{ github.ref_name }}
+          git add .
+          git commit -m "Update discord-bot-v3 image tag to ${{ github.ref_name }}"
+      - name: Push to gitops repo
+        run: |
+          cd $GITHUB_WORKSPACE/gitops
+          git push origin main
