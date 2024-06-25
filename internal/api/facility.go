@@ -3,7 +3,8 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"fmt"
+	"io"
 )
 
 type FacilityData struct {
@@ -30,9 +31,9 @@ func GetFacilities() ([]FacilityData, error) {
 		return nil, nil
 	}
 	if response.StatusCode != 200 {
-		return nil, errors.New("HTTP Error when fetching facility data")
+		return nil, errors.New(fmt.Sprintf("HTTP Error when fetching facility data: %d", response.StatusCode))
 	}
-	responseData, err := ioutil.ReadAll(response.Body)
+	responseData, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}

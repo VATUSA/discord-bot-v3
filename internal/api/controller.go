@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 )
 
 type ControllerDataWrapper struct {
@@ -43,9 +43,9 @@ func GetControllerData(discordId string) (*ControllerData, error) {
 		return nil, nil
 	}
 	if response.StatusCode != 200 {
-		return nil, errors.New("HTTP Error when fetching controller data")
+		return nil, errors.New(fmt.Sprintf("HTTP Error when fetching controller data: %d", response.StatusCode))
 	}
-	responseData, err := ioutil.ReadAll(response.Body)
+	responseData, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
