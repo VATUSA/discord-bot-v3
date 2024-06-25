@@ -1,9 +1,0 @@
-resources:
-  - bot.yaml
-  - web-shim.yaml
-  - web-shim-service.yaml
-  - web-shim-ingress.yaml
-
-images:
-  - name: vatusa/discord-bot-v3
-    newTag: "1.1.16"
