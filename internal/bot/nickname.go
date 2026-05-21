@@ -3,12 +3,13 @@ package bot
 import (
 	"errors"
 	"fmt"
-	"github.com/VATUSA/discord-bot-v3/internal/api"
-	"github.com/VATUSA/discord-bot-v3/pkg/constants"
-	"github.com/bwmarrin/discordgo"
 	"log"
 	"regexp"
 	"strings"
+
+	"github.com/VATUSA/discord-bot-v3/internal/api"
+	"github.com/VATUSA/discord-bot-v3/pkg/constants"
+	"github.com/bwmarrin/discordgo"
 )
 
 func SyncName(s *discordgo.Session, m *discordgo.Member, c *api.ControllerData, cfg *ServerConfig) error {
@@ -151,13 +152,18 @@ func CalculateLocalTitle(c *api.ControllerData, cfg *ServerConfig) string {
 		if strings.HasPrefix(r.Role, "US") {
 			re := regexp.MustCompile("[0-9]+")
 			match := re.FindString(r.Role)
+			if match == "0" {
+				return "VATUSA"
+			}
 			if match != "" {
 				return fmt.Sprintf("VATUSA%s", match)
 			}
 		}
 	}
 	roleTitle, hasRoleTitle := facilityStaffTitle(c)
-	if hasRoleTitle {
+	if hasRoleTitle && c.Facility == cfg.Facility {
+		return fmt.Sprintf("%s", roleTitle)
+	} else if hasRoleTitle {
 		return fmt.Sprintf("%s %s", c.Facility, roleTitle)
 	}
 	if c.Facility == "ZZN" {
