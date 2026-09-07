@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"fmt"
 	"github.com/VATUSA/discord-bot-v3/internal/api"
 	"github.com/VATUSA/discord-bot-v3/pkg/constants"
 	"github.com/bwmarrin/discordgo"
@@ -124,15 +123,63 @@ func checkCondition(c *api.ControllerData, condType constants.ConditionType, val
 		}
 		return false
 	case constants.Condition_FacilityRole:
-		for _, r := range c.Roles {
-			if *value == fmt.Sprintf("%s:%s", r.Facility, r.Role) {
-				return true
-			}
+		if value == nil {
+			log.Print("Invalid facility_role condition: missing value")
+			return false
 		}
-		return false
+		facility, position, scope, ok := parseFacilityRoleValue(*value)
+		if !ok {
+			log.Printf("Invalid facility_role condition value %q", *value)
+			return false
+		}
+		if scope == facilityRoleScopeAny {
+			return holdsFacilityRole(c, facility, position)
+		}
+		poc, known := FacilityPOC(facility, position)
+		if !known {
+			log.Printf("Invalid facility_role condition value %q: %s is not a staff position", *value, position)
+			return false
+		}
+		if scope == facilityRoleScopePOC {
+			return poc != 0 && poc == c.CID
+		}
+		return holdsFacilityRole(c, facility, position) && c.CID != poc
 	default:
-		log.Printf("Invalid RoleConditionCriteriaType %d", condType)
+		log.Printf("Invalid RoleConditionCriteriaType %q", condType)
 		return false
 
 	}
+}
+
+type facilityRoleScope int
+
+const (
+	facilityRoleScopeAny  facilityRoleScope = iota // "ZZZ:WM" - anyone holding the role
+	facilityRoleScopePOC                           // "ZZZ:WM:POC" - the facility's point of contact
+	facilityRoleScopeTeam                          // "ZZZ:WM:TEAM" - role holders other than the POC
+)
+
+func parseFacilityRoleValue(value string) (facility string, position string, scope facilityRoleScope, ok bool) {
+	parts := strings.Split(value, ":")
+	switch len(parts) {
+	case 2:
+		return parts[0], parts[1], facilityRoleScopeAny, true
+	case 3:
+		switch strings.ToUpper(parts[2]) {
+		case "POC":
+			return parts[0], parts[1], facilityRoleScopePOC, true
+		case "TEAM":
+			return parts[0], parts[1], facilityRoleScopeTeam, true
+		}
+	}
+	return "", "", facilityRoleScopeAny, false
+}
+
+func holdsFacilityRole(c *api.ControllerData, facility string, position string) bool {
+	for _, r := range c.Roles {
+		if r.Facility == facility && r.Role == position {
+			return true
+		}
+	}
+	return false
 }

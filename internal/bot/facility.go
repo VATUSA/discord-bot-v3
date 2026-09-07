@@ -29,6 +29,23 @@ func GetFacilityData(facilityId string) api.FacilityData {
 		t := time.Now()
 		LastFacilityDataLoad = &t
 	}
-	facility := FacilityDataByIdMap[facilityId]
+	facility := FacilityDataByIdMap[strings.ToUpper(facilityId)]
 	return facility
+}
+
+var facilityPOCByPosition = map[string]func(api.FacilityData) uint64{
+	"ATM":  func(f api.FacilityData) uint64 { return f.AirTrafficManagerCID },
+	"DATM": func(f api.FacilityData) uint64 { return f.DeputyAirTrafficManagerCID },
+	"TA":   func(f api.FacilityData) uint64 { return f.TrainingAdministratorCID },
+	"EC":   func(f api.FacilityData) uint64 { return f.EventCoordinatorCID },
+	"FE":   func(f api.FacilityData) uint64 { return f.FacilityEngineerCID },
+	"WM":   func(f api.FacilityData) uint64 { return f.WebMasterCID },
+}
+
+func FacilityPOC(facilityId string, position string) (uint64, bool) {
+	get, ok := facilityPOCByPosition[strings.ToUpper(position)]
+	if !ok {
+		return 0, false
+	}
+	return get(GetFacilityData(facilityId)), true
 }
