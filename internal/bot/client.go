@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 )
 
@@ -27,17 +29,21 @@ func Run() {
 
 	AddMemberHandlers(session)
 
+	// Ready fires again on every full reconnect, so only start the background workers once.
+	var startWorkers sync.Once
 	session.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
-		go IntervalRefreshAll(s)
-		go IntervalReloadConfigs()
-		go func() {
-			for {
-				QueueListen(s)
-				log.Println("MQ Connection lost. Attempting to reconnect.")
-				time.Sleep(5 * time.Second)
-			}
-		}()
+		startWorkers.Do(func() {
+			go IntervalRefreshAll(s)
+			go IntervalReloadConfigs()
+			go func() {
+				for {
+					QueueListen(s)
+					log.Println("MQ Connection lost. Attempting to reconnect.")
+					time.Sleep(5 * time.Second)
+				}
+			}()
+		})
 	})
 
 	// TODO: Add hook for GuildMemberAdd to automatically trigger roles for that member.
@@ -49,7 +55,7 @@ func Run() {
 	defer session.Close()
 
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	log.Println("Press Ctrl+C to exit")
 	<-stop
 }
