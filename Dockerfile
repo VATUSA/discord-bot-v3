@@ -12,10 +12,10 @@ COPY pkg ./pkg
 ARG TARGETOS
 ARG TARGETARCH
 # CGO_ENABLED=0 is required for cross-compilation without a target C toolchain,
-# and is safe here: both binaries are pure Go.
+# and is safe here: the binary is pure Go.
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o bin/bot ./cmd/bot/main.go
-RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o bin/web ./cmd/web/main.go
 
 FROM alpine:latest AS app
 WORKDIR /app
+EXPOSE 9002
 COPY --from=build /go/src/github.com/VATUSA/discord-bot-v3/bin/* ./

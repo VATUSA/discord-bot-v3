@@ -1,68 +1,26 @@
 package bot
 
 import (
-	"github.com/VATUSA/discord-bot-v3/internal/queue"
+	"context"
+	"github.com/VATUSA/discord-bot-v3/internal/commands"
 	"github.com/bwmarrin/discordgo"
-	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 )
 
-func QueueListen(s *discordgo.Session) {
-	conn, err := amqp.Dial(queue.ConnectionString())
-	if err != nil {
-		log.Println("Failed to connect to RabbitMQ")
-		return
-	}
-	notify := make(chan *amqp.Error)
-	conn.NotifyClose(notify)
-	defer conn.Close()
+func QueueListen(ctx context.Context, s *discordgo.Session, cmds <-chan commands.Command) {
+	log.Print("Waiting for commands...")
 
-	ch, err := conn.Channel()
-	if err != nil {
-		log.Println("Failed to open a channel")
-		return
-	}
-	defer ch.Close()
-
-	q, err := ch.QueueDeclare(
-		"discord_sync", // name
-		true,           // durable
-		false,          // delete when unused
-		false,          // exclusive
-		false,          // no-wait
-		nil,            // arguments
-	)
-	if err != nil {
-		log.Println("Failed to declare a queue")
-		return
-	}
-
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		false,  // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	if err != nil {
-		log.Println("Failed to register a consumer")
-		return
-	}
-
-	log.Print("Connected to RabbitMQ. Waiting for messages...")
-
-loop:
 	for {
 		select {
-		case err = <-notify:
-			break loop
-		case d := <-msgs:
-			log.Printf("Received a message: %s", d.Body)
-			ProcessMemberInGuilds(s, string(d.Body))
-			d.Ack(false)
+		case <-ctx.Done():
+			log.Print("Stopped processing commands.")
+			return
+		case cmd := <-cmds:
+			switch c := cmd.(type) {
+			case commands.SyncMember:
+				log.Printf("Received sync for member: %s", c.UserID)
+				ProcessMemberInGuilds(s, c.UserID)
+			}
 		}
 	}
-	log.Print("Stopped processing RabbitMQ.")
 }
