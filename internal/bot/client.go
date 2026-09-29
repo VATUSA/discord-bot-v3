@@ -32,7 +32,7 @@ func Run(ctx context.Context, cmds <-chan commands.Command) error {
 	if err != nil {
 		return err
 	}
-	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
+	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged | discordgo.IntentGuildMembers | discordgo.IntentMessageContent)
 
 	AddMemberHandlers(session)
 

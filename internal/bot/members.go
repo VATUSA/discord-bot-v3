@@ -44,7 +44,7 @@ func ProcessGuildMembersChunk(s *discordgo.Session, mc *discordgo.GuildMembersCh
 
 func RequestGuildMembers(s *discordgo.Session, g *discordgo.Guild, cfg *ServerConfig) error {
 	log.Printf("Fetching members for guild %s (%s)", g.ID, cfg.Name)
-	err := s.RequestGuildMembers(g.ID, "", 0, "1", true)
+	err := s.RequestGuildMembers(g.ID, "", 0, "1", false)
 	if err != nil {
 		return err
 	}
