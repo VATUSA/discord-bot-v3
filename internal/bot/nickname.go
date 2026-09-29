@@ -6,11 +6,54 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/VATUSA/discord-bot-v3/internal/api"
 	"github.com/VATUSA/discord-bot-v3/pkg/constants"
 	"github.com/bwmarrin/discordgo"
 )
+
+// maxNicknameLength is Discord's nickname limit, counted in characters.
+const maxNicknameLength = 32
+
+// shortenNickname fits name+suffix into Discord's nickname limit by trying
+// progressively shorter forms of the name: first and last, first and last
+// initial, first name only, then a hard truncation of the first name.
+func shortenNickname(name, suffix string) string {
+	fits := func(n string) bool {
+		return utf8.RuneCountInString(n+suffix) <= maxNicknameLength
+	}
+	parts := strings.Fields(name)
+	if len(parts) == 0 {
+		return name + suffix
+	}
+	first, last := parts[0], parts[len(parts)-1]
+	candidates := []string{first}
+	if len(parts) > 1 {
+		initial, _ := utf8.DecodeRuneInString(last)
+		candidates = []string{
+			first + " " + last,
+			first + " " + string(initial),
+			first,
+		}
+	}
+	for _, c := range candidates {
+		if fits(c) {
+			return c + suffix
+		}
+	}
+	// Even the first name doesn't fit; truncate it, dropping the suffix if it
+	// alone leaves no room.
+	room := maxNicknameLength - utf8.RuneCountInString(suffix)
+	if room < 1 {
+		room, suffix = maxNicknameLength, ""
+	}
+	r := []rune(first)
+	if len(r) > room {
+		r = r[:room]
+	}
+	return string(r) + suffix
+}
 
 func SyncName(s *discordgo.Session, m *discordgo.Member, c *api.ControllerData, cfg *ServerConfig) error {
 	if c == nil {
@@ -34,18 +77,16 @@ func SyncName(s *discordgo.Session, m *discordgo.Member, c *api.ControllerData, 
 	if err != nil {
 		return nil
 	}
-	var prospect string
+	var suffix string
 	if strings.HasSuffix(m.Nick, "| VATGOV") {
-		prospect = fmt.Sprintf("%s | VATGOV", name)
+		suffix = " | VATGOV"
 	} else if title != "" {
-		prospect = fmt.Sprintf("%s | %s", name, title)
-	} else {
-		prospect = name
+		suffix = " | " + title
 	}
-	if len(prospect) > 32 {
+	prospect := name + suffix
+	if utf8.RuneCountInString(prospect) > maxNicknameLength {
 		oldProspect := prospect
-		nameParts := strings.SplitN(name, " ", -1)
-		prospect = fmt.Sprintf("%s %s | %s", nameParts[0], nameParts[len(nameParts)-1], title)
+		prospect = shortenNickname(name, suffix)
 		log.Printf("[%s] Prospective nickname too long %s - Shortened to %s", cfg.Name, oldProspect, prospect)
 	}
 	if prospect != m.Nick {
