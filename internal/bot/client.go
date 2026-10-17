@@ -42,7 +42,7 @@ func Run(ctx context.Context, cmds <-chan commands.Command) error {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 		startWorkers.Do(func() {
 			atomic.StoreInt32(&ready, 1)
-			go IntervalRefreshAll(s)
+			go IntervalRefreshAll(ctx, s)
 			go IntervalReloadConfigs()
 			go QueueListen(ctx, s, cmds)
 		})
