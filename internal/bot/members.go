@@ -32,30 +32,31 @@ func ProcessMember(s *discordgo.Session, m *discordgo.Member, cfg *ServerConfig)
 	if err != nil {
 		return err
 	}
-	err = SyncName(s, m, controller, cfg)
-	if err != nil {
-		return err
-	}
-	err = SyncRoles(s, m, controller, cfg)
-	if err != nil {
-		return err
-	}
-	return nil
+	return syncMember(s, m, controller, cfg)
 }
 
+// syncMember applies already-fetched controller data to a member's nickname and roles.
+func syncMember(s *discordgo.Session, m *discordgo.Member, controller *api.ControllerData, cfg *ServerConfig) error {
+	err := SyncName(s, m, controller, cfg)
+	if err != nil {
+		return err
+	}
+	return SyncRoles(s, m, controller, cfg)
+}
+
+// ProcessGuildMembersChunk hands chunks to the running sweep, which dedupes
+// users across guilds and paces the API lookups.
 func ProcessGuildMembersChunk(s *discordgo.Session, mc *discordgo.GuildMembersChunk) {
 	cfg := GetServerConfig(mc.GuildID)
 	if cfg == nil {
 		return
 	}
-	log.Printf("[%s] Processing member chunk %d/%d (%d members)", cfg.Name, mc.ChunkIndex+1, mc.ChunkCount, len(mc.Members))
-	for _, member := range mc.Members {
-		err := ProcessMember(s, member, cfg)
-		if err != nil {
-			log.Printf("[%s] Error in ProcessMember %s: %s", cfg.Name, member.User.ID, err.Error())
-		}
+	c := currentCollector()
+	if c == nil || !c.add(mc, *cfg) {
+		log.Printf("[%s] Ignoring member chunk %d/%d outside of a sweep", cfg.Name, mc.ChunkIndex+1, mc.ChunkCount)
+		return
 	}
-	log.Printf("[%s] Finished member chunk %d/%d", cfg.Name, mc.ChunkIndex+1, mc.ChunkCount)
+	log.Printf("[%s] Collected member chunk %d/%d (%d members)", cfg.Name, mc.ChunkIndex+1, mc.ChunkCount, len(mc.Members))
 }
 
 func RequestGuildMembers(s *discordgo.Session, g *discordgo.Guild, cfg *ServerConfig) error {
